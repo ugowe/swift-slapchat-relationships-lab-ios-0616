@@ -12,6 +12,8 @@ import CoreData
 class DataStore {
     
     var messages:[Message] = []
+    var recipients: [Recipient] = []
+    
     
     static let sharedDataStore = DataStore()
     
@@ -35,22 +37,22 @@ class DataStore {
     func fetchData ()
     {
         
-        var error:NSError? = nil
+        var error: NSError? = nil
         
-        let messagesRequest = NSFetchRequest(entityName: "Message")
+        let recipientsRequest = NSFetchRequest(entityName: "Recipient")
         
-        let createdAtSorter = NSSortDescriptor(key: "createdAt", ascending:true)
+        let createdAtSorter = NSSortDescriptor(key: "name", ascending:true)
         
-        messagesRequest.sortDescriptors = [createdAtSorter]
+        recipientsRequest.sortDescriptors = [createdAtSorter]
         
         do{
-            messages = try managedObjectContext.executeFetchRequest(messagesRequest) as! [Message]
+            recipients = try managedObjectContext.executeFetchRequest(recipientsRequest) as! [Recipient]
         }catch let nserror1 as NSError{
             error = nserror1
-            messages = []
+            recipients = []
         }
         
-        if messages.count == 0 {
+        if recipients.count == 0 {
             generateTestData()
         }
         
@@ -58,6 +60,18 @@ class DataStore {
     }
     
     func generateTestData() {
+        
+        let recipientOne: Recipient = NSEntityDescription.insertNewObjectForEntityForName("Recipient", inManagedObjectContext: managedObjectContext) as! Recipient
+        
+        recipientOne.name = "Recipient 1"
+        
+        let recipientTwo: Recipient = NSEntityDescription.insertNewObjectForEntityForName("Recipient", inManagedObjectContext: managedObjectContext) as! Recipient
+        
+        recipientTwo.name = "Recipient 2"
+        
+        let recipientThree: Recipient = NSEntityDescription.insertNewObjectForEntityForName("Recipient", inManagedObjectContext: managedObjectContext) as! Recipient
+        
+        recipientThree.name = "Recipient 3"
         
         let messageOne: Message = NSEntityDescription.insertNewObjectForEntityForName("Message", inManagedObjectContext: managedObjectContext) as! Message
         
@@ -73,6 +87,11 @@ class DataStore {
         
         messageThree.content = "Message 3"
         messageThree.createdAt = NSDate()
+        
+        recipientOne.messages?.insert(messageOne)
+        recipientTwo.messages?.insert(messageTwo)
+        recipientThree.messages?.insert(messageThree)
+        
         
         saveContext()
         fetchData()
